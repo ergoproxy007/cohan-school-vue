@@ -108,9 +108,17 @@
         </button>
       </div>
       <div class="px-2">
+        <button class="button is-warning is-light" @click="updateStudent">
+          Actualizar
+        </button>
+      </div>
+      <div class="px-2">
         <button class="button is-light" @click="clearForm">
           Limpiar
         </button>
+      </div>
+      <div class="px-2" v-if="isLoading">
+        <VueSpinner size="40" />
       </div>
     </div>
   </div>
@@ -130,11 +138,13 @@
   import StudentService from '../../services/StudentService.js'
   import Util from '../../services/util.js'
   import Dialog from '../../services/dialog.js'
+  import { VueSpinner } from 'vue3-spinners'
 
   export default {
     name: 'StudentForm',
     components: {
       FormInput,
+      VueSpinner,
     },
     props: {},
     data() {
@@ -171,14 +181,14 @@
           this.errors[field] = ''
         }
       },
-      findStudent() {
+      async findStudent() {
         try {
           this.clearError()
           this.validateField('dni', 'Documento')
           if (this.errors.dni || !this.model.dni) {
             Dialog.showDialog(this.$buefy, 'Consultar', 'El Documento es obligatorio', 'is-info')
           } else {
-            this.find()
+            await this.find()
           }
         } catch(error) {
           console.error(error)
@@ -236,6 +246,41 @@
           console.error(error)
           this.errorDialog('Ocurrió un error al guardar el estudiante', 'SERVER_ERROR')
         }
+      },
+      async updateStudent() {
+        if (!this.model.id) {
+          this.errorDialog('No se ha consultado un estudiante para actualizar', 'Actualizar')
+        } else {
+          this.setLoading(true)
+          try {
+            const data = {
+              id: this.model.id,
+              dni: this.model.dni,
+              name: this.model.name,
+              phoneNumber: this.model.phoneNumber,
+              email: this.model.email,
+              averageMark: this.model.averageMark,
+              number: this.model.number,
+            };
+            const isValid = this.isValidDataForm(data)
+            if (isValid) {
+              await this.update(data)
+            } else {
+              const messages = Object.values(this.errors).filter(m => m)
+              this.showFormError(messages)
+            }            
+          } catch(error) {
+            console.error(error)
+            this.errorDialog('Ocurrió un error al consultar el estudiante', 'SERVER_ERROR')
+          } finally {
+            this.setLoading(false)
+          }
+        }
+      },
+      async update(data) {
+        const payload = Util.toSnakeCase(data)
+        const response = await StudentService.update(data.id, payload)
+        Dialog.showDialog(this.$buefy, 'Actualizar', response.data.message)
       },
       handleError(error) {
         if (StudentService.checkAxiosError(error)) {
@@ -301,7 +346,7 @@
       },
       setLoading(load) {
         this.isLoading = load
-      }
+      },
     }
   }
 </script>
