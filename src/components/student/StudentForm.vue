@@ -98,12 +98,12 @@
 
     <div class="buttons is-right top-padding-2">
       <div class="px-1">
-        <button class="button is-primary" @click="$router.go(-1)">
+        <button class="button is-primary" @click="saveStudent">
           Crear Estudiante
         </button>
       </div>
       <div class="px-2">
-        <button class="button is-light" @click="$router.go(-1)">
+        <button class="button is-light" @click="cleanForm">
           Limpiar
         </button>
       </div>
@@ -119,15 +119,12 @@
     .top-padding-2 {
         padding-top: 2rem;
     }
-    #average-mark-input input {
-  width: 100%;       /* ocupa todo el ancho */
-  height: 3rem;      /* altura más grande */
-  font-size: 1.25rem; /* tamaño de fuente */
-}
 </style>
 
 <script>
   import FormInput from '../../components/form/FormInput.vue'
+  import StudentService from '../../services/StudentService.js'
+  import Util from '../../services/util.js'
 
   export default {
     name: 'StudentForm',
@@ -137,19 +134,23 @@
     props: {},
     data() {
       return {
-        model: {
+        model: this.initModel(),
+        errors: {
+        },
+      }
+    },
+    methods: {
+      initModel() {
+        return {
+          id: '',
           name: '',
           dni: '',
           phoneNumber: '',
           email: '',
           averageMark: null,
           number: null,
-        },
-        errors: {
-        },
-      }
-    },
-    methods: {
+        };
+      },
       validateField(field, label) {
         const value = this.model[field]?.trim()
         this.checkError(value, field, label)
@@ -157,9 +158,104 @@
       checkError(value, field, label) {
         if (!value) {
           this.errors[field] = `${label} es obligatorio`
+          this.model[field] = this.model[field]?.trim()
         } else {
           this.errors[field] = ''
         }
+      },
+      saveStudent() {
+        try {
+          const data = {
+            dni: this.model.dni,
+            name: this.model.name,
+            phoneNumber: this.model.phoneNumber,
+            email: this.model.email,
+            averageMark: this.model.averageMark,
+            number: this.model.number,
+          };
+          const isValid = this.isValidDataForm(data)
+          if (isValid) {
+            const payload = Util.toSnakeCase(data)
+            StudentService.create(payload)
+            .then(response => {
+              this.model.id = response.data.id
+            })
+            .catch(error => {
+              if (StudentService.checkAxiosError(error)) {
+                Util.handleError(error, this.errorDialog)
+              } else {
+                Util.handleGenericError(error, this.errorDialog)
+              }
+            });
+          } else {
+            const messages = Object.values(this.errors).filter(m => m)
+            this.showFormError(messages)
+          }
+        } catch(error) {
+          console.error(error)
+          this.errorDialog('Ocurrió un error al guardar el estudiante', 'CLIENT_ERROR')
+        }
+      },
+      isValidDataForm(data) {
+        try {
+          let isValid = true
+          this.validateField('dni', 'Documento')
+          if (this.errors.dni || !data.dni) {
+              isValid = false
+          }
+          this.validateField('name', 'Nombre')
+          if (this.errors.name || !data.name) {
+              isValid = false
+          }
+          if (data.email) {
+              const emailOk = this.validateEmail(data.email)
+              isValid = emailOk
+          }
+          return isValid
+        } catch(error) {
+          console.error(error)
+          this.errorDialog('Ocurrió un error al validar los datos', 'UNKNOWN_ERROR')
+          return false
+        }
+      },
+      validateEmail(email) {
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!regex.test(email)) {
+          this.errors.email = 'Email invalido'
+          return false
+        }
+        this.errors.email = ''
+        return true
+      },
+      showFormError(messages) {
+        if (messages.length > 0) {
+          const messageError = `<span>Validar los siguientes campos:<br> <b>${messages.join('<br>')}</b></span>`
+          this.errorDialog(messageError)
+        }
+      },
+      errorDialog(messageError, title = 'Error') {
+        this.$buefy.dialog.alert({
+            title: title,
+            message: messageError,
+            type: "is-danger",
+            hasIcon: true,
+            icon: "times-circle",
+            iconPack: "fa",
+            ariaRole: "alertdialog",
+            ariaModal: true,
+        });
+      },
+      successDialog(messages) {
+        this.$buefy.dialog.alert({
+          title: "Crear Estudiante",
+          message: `<span>El estudiante fue registrado exitosamente</span>`,
+          type: "is-success",
+          ariaRole: "alertdialog",
+          ariaModal: true,
+        });
+      },
+      cleanForm() {
+        this.model = this.initModel()
       },
     }
   }
