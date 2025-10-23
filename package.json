@@ -1,7 +1,10 @@
 {
+  "homepage": "https://ergoproxy007.github.io/cohan-school-serverless",
   "name": "cohan-school-vue",
   "version": "0.0.0",
   "scripts": {
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
@@ -26,6 +29,7 @@
     "@vue/eslint-config-prettier": "^7.0.0",
     "eslint": "^8.22.0",
     "eslint-plugin-vue": "^9.3.0",
+    "gh-pages": "^6.3.0",
     "prettier": "^2.7.1",
     "vite": "^3.1.8"
   }
