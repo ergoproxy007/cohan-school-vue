@@ -63,6 +63,10 @@ nav a:first-of-type {
     padding-right: calc(var(--section-gap) / 2);
   }
 
+  nav {
+    width: 200px;
+  }
+
   .logo {
     margin: 0 2rem 0 0;
   }

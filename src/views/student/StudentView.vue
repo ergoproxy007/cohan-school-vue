@@ -1,22 +1,32 @@
-<script setup>
-import PanelFomsContainer from '../../components/PanelFomsContainer.vue'
-import SupportIcon from '../../components/icons/IconSupport.vue'
-</script>
-
 <template>
   <main>
-    <template>
-      <p>Student View</p>
-    </template>
-
     <PanelFomsContainer>
-      <template #icon><SupportIcon /></template>
-      <template #heading>Support Vue</template>
-      <p>
-        As an independent project, Vue relies on community backing for its sustainability.
-        You can help us by
-        <a href="https://vuejs.org/sponsor/" target="_blank" rel="noopener">becoming a sponsor</a>.
-      </p>
-  </PanelFomsContainer>
+      <template #icon><DocumentationIcon /></template>
+      <template #heading>Registro Estudiante</template>
+      <StudentForm :model="model" />
+    </PanelFomsContainer>
   </main>
 </template>
+
+<script>
+  import PanelFomsContainer from '../../components/PanelFomsContainer.vue'
+  import DocumentationIcon from '../../components/icons/IconDocumentation.vue'
+  import StudentForm from '../../components/student/StudentForm.vue'
+
+  export default {
+    name: 'StudentView',
+    components: {
+      PanelFomsContainer,
+      DocumentationIcon,
+      StudentForm,
+    },
+    data() {
+      const model = {
+        "title": "",
+        "done": false,
+        "assignee_id": ""
+      }
+      return { model }
+    },
+  }
+</script>
