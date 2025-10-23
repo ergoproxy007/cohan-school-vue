@@ -11,8 +11,8 @@ import LandingPageLeftPanel from './components/LandingPageLeftPanel.vue'
       <LandingPageLeftPanel msg="COHAN" title="School Frontend" />
 
       <nav>
-        <RouterLink to="/">Students</RouterLink>
-        <RouterLink to="/teacher">Teachers</RouterLink>
+        <RouterLink to="/">Estudiantes</RouterLink>
+        <RouterLink to="/teacher">Profesores</RouterLink>
       </nav>
     </div>
   </header>
@@ -64,7 +64,7 @@ nav a:first-of-type {
   }
 
   nav {
-    width: 200px;
+    width: 220px;
   }
 
   .logo {

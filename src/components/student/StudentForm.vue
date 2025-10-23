@@ -103,12 +103,16 @@
         </button>
       </div>
       <div class="px-2">
-        <button class="button is-light" @click="cleanForm">
+        <button class="button is-info" @click="findStudent">
+          Consultar
+        </button>
+      </div>
+      <div class="px-2">
+        <button class="button is-light" @click="clearForm">
           Limpiar
         </button>
       </div>
     </div>
-
   </div>
 </template>
 
@@ -138,6 +142,7 @@
         model: this.initModel(),
         errors: {
         },
+        isLoading: false,
       }
     },
     methods: {
@@ -154,7 +159,9 @@
       },
       validateField(field, label) {
         const value = this.model[field]?.trim()
-        this.checkError(value, field, label)
+        if (value) {
+          this.checkError(value, field, label)
+        }
       },
       checkError(value, field, label) {
         if (!value) {
@@ -162,6 +169,33 @@
           this.model[field] = this.model[field]?.trim()
         } else {
           this.errors[field] = ''
+        }
+      },
+      findStudent() {
+        try {
+          this.clearError()
+          this.validateField('dni', 'Documento')
+          if (this.errors.dni || !this.model.dni) {
+            Dialog.showDialog(this.$buefy, 'Consultar', 'El Documento es obligatorio', 'is-info')
+          } else {
+            this.find()
+          }
+        } catch(error) {
+          console.error(error)
+          this.errorDialog('Ocurrió un error al consultar el estudiante', 'SERVER_ERROR')
+        }
+      },
+      async find() {
+        this.setLoading(true)
+        try {
+          const response = await StudentService.get(this.model.dni)
+          const dataResponse = Util.keysToCamelCase(response.data)
+          this.model = dataResponse
+        } catch(error) {
+          console.error(error)
+          this.errorDialog('Ocurrió un error al consultar el estudiante', 'SERVER_ERROR')
+        } finally {
+          this.setLoading(false)
         }
       },
       saveStudent() {
@@ -192,8 +226,8 @@
           StudentService.create(payload)
             .then(response => {
               console.log(`response: ${response.data}`)
-              this.cleanForm()
-              Dialog.successDialog(this.$buefy, 'Crear', 'Estudiante creado exitosamente')
+              this.clearForm()
+              Dialog.showDialog(this.$buefy, 'Crear', 'Estudiante creado exitosamente')
             })
             .catch(error => {
               this.handleError(error)
@@ -259,18 +293,15 @@
             ariaModal: true,
         });
       },
-      successDialog() {
-        this.$buefy.dialog.alert({
-          title: "Crear Estudiante",
-          message: `<span>El estudiante fue registrado exitosamente</span>`,
-          type: "is-success",
-          ariaRole: "alertdialog",
-          ariaModal: true,
-        });
-      },
-      cleanForm() {
+      clearForm() {
         this.model = this.initModel()
       },
+      clearError() {
+        this.errors = {}
+      },
+      setLoading(load) {
+        this.isLoading = load
+      }
     }
   }
 </script>

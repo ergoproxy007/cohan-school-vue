@@ -1,9 +1,10 @@
 class Dialog {
-    successDialog(buefy, title, sucessMessage) {
+
+    showDialog(buefy, title, text, typeDialog = 'is-success') {
         buefy.dialog.alert({
         title: title,
-        message: sucessMessage,
-        type: "is-success",
+        message: text,
+        type: typeDialog,
         ariaRole: "alertdialog",
         ariaModal: true,
         });

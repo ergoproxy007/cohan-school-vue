@@ -10,6 +10,17 @@ class Util {
         return result;
     }
 
+    keysToCamelCase(obj) {
+        const result = {};
+        for (const key in obj) {
+            if (obj.hasOwnProperty(key)) {
+            const camelKey = key.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
+            result[camelKey] = obj[key];
+            }
+        }
+        return result;
+    }
+
     getHtmlError(errorResponse) {
         const errorsArray = errorResponse.data.errors
         return `<span>${errorsArray.join('<br/>')}</span>`
