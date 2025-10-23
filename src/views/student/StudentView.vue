@@ -2,7 +2,7 @@
   <main>
     <PanelFomsContainer>
       <template #icon><DocumentationIcon /></template>
-      <template #heading>Registro Estudiante</template>
+      <template #heading><h1 class="sub-title">Registro Estudiante</h1></template>
       <StudentForm :model="model" />
     </PanelFomsContainer>
   </main>
@@ -30,3 +30,12 @@
     },
   }
 </script>
+
+<style scoped>
+  .sub-title {
+    font-size: 1.7rem;
+    color:#00BD7E;
+    font-weight: 700;
+    margin-bottom: 0.8rem;
+  }
+</style>
