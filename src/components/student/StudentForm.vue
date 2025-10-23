@@ -62,13 +62,15 @@
         label="Número"
         class="top-padding"
       >
-        <b-numberinput
-           id="number-input"
-           placeholder="número"
+        <b-numberinput size="is-medium"
+          id="number-input"
+          placeholder="número"
           icon-pack="far"
           icon="address-book"
-           :controls="false"
-           v-model="model.number"
+          :controls="false"
+          :min="0"
+          :max="99999"
+          v-model="model.number"
         >
         </b-numberinput>
       </b-field>
@@ -79,13 +81,15 @@
         label="Nota Promedio"
         class="top-padding"
       >
-        <b-numberinput
+        <b-numberinput size="is-medium"
           id="average-mark-input"
           placeholder="ej: 3.5"
           icon-pack="far"
           icon="star"
           step="0.1"
           :controls="false"
+          :min="0"
+          :max="5"
           v-model="model.averageMark"
         >
         </b-numberinput>
@@ -115,6 +119,11 @@
     .top-padding-2 {
         padding-top: 2rem;
     }
+    #average-mark-input input {
+  width: 100%;       /* ocupa todo el ancho */
+  height: 3rem;      /* altura más grande */
+  font-size: 1.25rem; /* tamaño de fuente */
+}
 </style>
 
 <script>
