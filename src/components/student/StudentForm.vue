@@ -125,6 +125,7 @@
   import FormInput from '../../components/form/FormInput.vue'
   import StudentService from '../../services/StudentService.js'
   import Util from '../../services/util.js'
+  import Dialog from '../../services/dialog.js'
 
   export default {
     name: 'StudentForm',
@@ -175,18 +176,7 @@
           };
           const isValid = this.isValidDataForm(data)
           if (isValid) {
-            const payload = Util.toSnakeCase(data)
-            StudentService.create(payload)
-            .then(response => {
-              this.model.id = response.data.id
-            })
-            .catch(error => {
-              if (StudentService.checkAxiosError(error)) {
-                Util.handleError(error, this.errorDialog)
-              } else {
-                Util.handleGenericError(error, this.errorDialog)
-              }
-            });
+            this.create(data)
           } else {
             const messages = Object.values(this.errors).filter(m => m)
             this.showFormError(messages)
@@ -195,6 +185,30 @@
           console.error(error)
           this.errorDialog('Ocurrió un error al guardar el estudiante', 'CLIENT_ERROR')
         }
+      },
+      create(data) {
+        const payload = Util.toSnakeCase(data)
+        try {
+          StudentService.create(payload)
+            .then(response => {
+              console.log(`response: ${response.data}`)
+              this.cleanForm()
+              Dialog.successDialog(this.$buefy, 'Crear', 'Estudiante creado exitosamente')
+            })
+            .catch(error => {
+              this.handleError(error)
+            });
+        } catch (error) {
+          console.error(error)
+          this.errorDialog('Ocurrió un error al guardar el estudiante', 'SERVER_ERROR')
+        }
+      },
+      handleError(error) {
+        if (StudentService.checkAxiosError(error)) {
+            Util.handleError(error, this.errorDialog)
+          } else {
+            Util.handleGenericError(error, this.errorDialog)
+          }
       },
       isValidDataForm(data) {
         try {
@@ -245,7 +259,7 @@
             ariaModal: true,
         });
       },
-      successDialog(messages) {
+      successDialog() {
         this.$buefy.dialog.alert({
           title: "Crear Estudiante",
           message: `<span>El estudiante fue registrado exitosamente</span>`,

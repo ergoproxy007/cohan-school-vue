@@ -1,4 +1,4 @@
-class Util{
+class Util {
     toSnakeCase(obj) {
         const result = {};
         for (const key in obj) {
