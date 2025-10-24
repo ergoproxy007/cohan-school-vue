@@ -1,1 +1,0 @@
-import{_ as s,o as t,c as a,a as o}from"./index.e8b1ebd0.js";const c={},_={class:"about"};function r(n,e){return t(),a("div",_,[...e[0]||(e[0]=[o("h1",{class:"temporal"},"P\xC1GINA EN CONSTRUCCI\xD3N",-1)])])}const i=s(c,[["render",r]]);export{i as default};
