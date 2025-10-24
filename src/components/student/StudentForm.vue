@@ -97,26 +97,12 @@
     </div>
 
     <div class="buttons is-right top-padding-2">
-      <div class="px-1">
-        <button class="button is-primary" @click="saveStudent">
-          Crear Estudiante
-        </button>
-      </div>
-      <div class="px-2">
-        <button class="button is-info" @click="findStudent">
-          Consultar
-        </button>
-      </div>
-      <div class="px-2">
-        <button class="button is-warning is-light" @click="updateStudent">
-          Actualizar
-        </button>
-      </div>
-      <div class="px-2">
-        <button class="button is-light" @click="clearForm">
-          Limpiar
-        </button>
-      </div>
+      <FormButtonActions
+        @save="saveStudent"
+        @find="findStudent"
+        @update="updateStudent"
+        @clear="clearForm"
+      />
       <div class="px-2" v-if="isLoading">
         <VueSpinner size="40" />
       </div>
@@ -135,6 +121,7 @@
 
 <script>
   import FormInput from '../../components/form/FormInput.vue'
+  import FormButtonActions from '../../components/form/FormButtonActions.vue'
   import StudentService from '../../services/StudentService.js'
   import Util from '../../services/util.js'
   import Dialog from '../../services/dialog.js'
@@ -144,14 +131,14 @@
     name: 'StudentForm',
     components: {
       FormInput,
+      FormButtonActions,
       VueSpinner,
     },
     props: {},
     data() {
       return {
         model: this.initModel(),
-        errors: {
-        },
+        errors: {},
         isLoading: false,
       }
     },
@@ -233,6 +220,8 @@
       create(data) {
         const payload = Util.toSnakeCase(data)
         try {
+          this.setLoading(true)
+
           StudentService.create(payload)
             .then(response => {
               console.log(`response: ${response.data}`)
@@ -241,8 +230,12 @@
             })
             .catch(error => {
               this.handleError(error)
+            })
+            .finally(() => {
+              this.setLoading(false)
             });
         } catch (error) {
+          this.setLoading(false)
           console.error(error)
           this.errorDialog('Ocurrió un error al guardar el estudiante', 'SERVER_ERROR')
         }

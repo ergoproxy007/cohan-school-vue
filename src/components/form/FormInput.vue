@@ -58,7 +58,7 @@
         },
         methods: {
             onValidate() {
-            this.$emit('validate', this.id, this.label)
+                this.$emit('validate', this.id, this.label)
             },
         },
     }
