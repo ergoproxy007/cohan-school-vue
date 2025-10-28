@@ -21,19 +21,20 @@ class Util {
         return result;
     }
 
-    getHtmlError(errorResponse) {
+    getHtmlError(errorResponse, message) {
+        const preMessage = message ? message.concat('<br/>') : ''
         const errorsArray = errorResponse.data.errors
-        return `<span>${errorsArray.join('<br/>')}</span>`
+        return `<span>${preMessage}${errorsArray.join('<br/>')}</span>`
     }
 
-    handleError(error, dialogCallback) {
+    handleError(error, dialogCallback, defaultMessage = 'Ha ocurrido un error') {
         console.error(`[status:${error.status}][error:${error.response}]`)
-        dialogCallback(this.getHtmlError(error.response), 'SERVER_ERROR')
+        dialogCallback(this.getHtmlError(error.response, defaultMessage), error.status, 'SERVER_ERROR')
     }
 
     handleGenericError(error, dialogCallback) {
         console.error(`[status:${error.status}][error:${error}]`)
-        dialogCallback('<span>Ocurrió un error en el servidor</span>', 'SERVER_ERROR')
+        dialogCallback('<span>Ocurrió un error en el servidor</span>', error.status, 'SERVER_ERROR')
     }
 }
 

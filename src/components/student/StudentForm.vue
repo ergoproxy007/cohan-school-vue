@@ -168,6 +168,16 @@
           this.errors[field] = ''
         }
       },
+      getAlertMessage(status, messageError) {
+        const mapStatusMessages = {
+            404: 'El estudiante consultado no existe',
+            500: messageError,
+        }
+        if (status) {
+          return mapStatusMessages[status]
+        }
+        return mapStatusMessages[500]
+      },
       async findStudent() {
         try {
           this.clearError()
@@ -179,7 +189,7 @@
           }
         } catch(error) {
           console.error(error)
-          this.errorDialog('Ocurrió un error al consultar el estudiante', 'SERVER_ERROR')
+          this.errorDialog('Ocurrió un error al consultar el estudiante', 500, 'SERVER_ERROR')
         }
       },
       async find() {
@@ -190,10 +200,16 @@
           this.model = dataResponse
         } catch(error) {
           console.error(error)
-          this.errorDialog('Ocurrió un error al consultar el estudiante', 'SERVER_ERROR')
+          this.handleFindError(error)
         } finally {
           this.setLoading(false)
         }
+      },
+      handleFindError(error) {
+        const status = error?.status || error?.response?.status
+        const defaultError = 'Ocurrió un error al consultar el estudiante'
+        const message = this.getAlertMessage(status, defaultError)
+        this.handleError(error, message)
       },
       saveStudent() {
         try {
@@ -214,7 +230,7 @@
           }
         } catch(error) {
           console.error(error)
-          this.errorDialog('Ocurrió un error al guardar el estudiante', 'CLIENT_ERROR')
+          this.errorDialog('Ocurrió un error al guardar el estudiante', 500, 'CLIENT_ERROR')
         }
       },
       create(data) {
@@ -237,12 +253,12 @@
         } catch (error) {
           this.setLoading(false)
           console.error(error)
-          this.errorDialog('Ocurrió un error al guardar el estudiante', 'SERVER_ERROR')
+          this.errorDialog('Ocurrió un error al guardar el estudiante', 500, 'SERVER_ERROR')
         }
       },
       async updateStudent() {
         if (!this.model.id) {
-          this.errorDialog('No se ha consultado un estudiante para actualizar', 'Actualizar')
+          this.errorDialog('No se ha consultado un estudiante para actualizar', 500,'Actualizar')
         } else {
           this.setLoading(true)
           try {
@@ -264,7 +280,7 @@
             }            
           } catch(error) {
             console.error(error)
-            this.errorDialog('Ocurrió un error al consultar el estudiante', 'SERVER_ERROR')
+            this.errorDialog('Ocurrió un error al consultar el estudiante', 500, 'SERVER_ERROR')
           } finally {
             this.setLoading(false)
           }
@@ -275,9 +291,9 @@
         const response = await StudentService.update(data.id, payload)
         Dialog.showDialog(this.$buefy, 'Actualizar', response.data.message)
       },
-      handleError(error) {
+      handleError(error, defaultMessage = 'Ha ocurrido un error') {
         if (StudentService.checkAxiosError(error)) {
-            Util.handleError(error, this.errorDialog)
+            Util.handleError(error, this.errorDialog, defaultMessage)
           } else {
             Util.handleGenericError(error, this.errorDialog)
           }
@@ -300,7 +316,7 @@
           return isValid
         } catch(error) {
           console.error(error)
-          this.errorDialog('Ocurrió un error al validar los datos', 'UNKNOWN_ERROR')
+          this.errorDialog('Ocurrió un error al validar los datos', 500, 'UNKNOWN_ERROR')
           return false
         }
       },
@@ -319,11 +335,12 @@
           this.errorDialog(messageError)
         }
       },
-      errorDialog(messageError, title = 'Error') {
+      errorDialog(messageError, status = 500, title = 'Error') {
+        const typeStyle = status <= 500 ? 'is-warning' : 'is-danger'
         this.$buefy.dialog.alert({
             title: title,
             message: messageError,
-            type: "is-danger",
+            type: typeStyle,
             hasIcon: true,
             icon: "times-circle",
             iconPack: "fa",
